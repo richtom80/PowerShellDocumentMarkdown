@@ -2,7 +2,7 @@ $hostname = hostname
 $systemInfo = Get-WmiObject -Class Win32_OperatingSystem
 $cpuInfo = Get-WmiObject -Class Win32_Processor
 $memoryInfo = Get-WmiObject -Class Win32_PhysicalMemory | Where-Object {$_.DeviceLocator -eq "M0001" }
-$nicInfo = Get-WmiObject -Class Win32_NetworkAdapterConfiguration | Where-Object {$_.IPEnabled -eq $true}
+$NicInfo = Get-NetIPAddress -AddressFamily IPv4
 $softwareInfo = Get-WmiObject -Class Win32_Product
 $roles = Get-WindowsFeature | Where-Object {$_.InstallState -eq 'Installed'}
 $DiskInfo = get-wmiobject -class win32_logicaldisk
@@ -29,10 +29,13 @@ $($DiskInfo | ForEach-Object{
 $SysOut += "
 ## Network Information
 
-| Name | IP | MAC | Gateway | DHCP | Suffix |
+| Alias | IP | GW | DNS1 | DNS2 | MAC |
 | - | - | - | - | - | - |`n"
-$($nicInfo | ForEach-Object {
-    $SysOut += "| $($_.Description) | $($_.IPAddress[0]) | $($_.MACAddress) | $($_.DefaultIPGateway) | $($_.DHCPEnabled) | $($_.DNSDomain) |`n"
+$($NicInfo | ForEach-Object{
+    $DNSServers = Get-DnsClientServerAddress -InterfaceAlias "$($_.InterfaceAlias)"
+    $Gateway = Get-NetIPConfiguration -InterfaceAlias  "$($_.InterfaceAlias)"
+    $MacAddr = Get-NetAdapter -InterfaceIndex $($_.InterfaceIndex)
+    $SysOut += "| $($_.InterfaceAlias) | $($_.IPAddress) | $($Gateway.IPv4DefaultGateway.NextHop) | $($DNSServers[0].ServerAddresses[0]) |  $($DNSServers[0].ServerAddresses[1]) | $($MACAddr.MacAddress) |`n"
 })
 $SysOut += "
 ## Shares Information
