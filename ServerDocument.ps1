@@ -27,25 +27,44 @@ $($DiskInfo | ForEach-Object{
     $SysOut += "| $($_.DeviceID) | $($_.VolumeName) | $([Math]::round($_.Size/1GB))GB | $([Math]::round($_.FreeSpace/1GB))GB |`n"
 })
 $SysOut += "
-## Network Information
+# Network Information
 
-| Alias | IP | GW | DNS1 | DNS2 | MAC |
-| - | - | - | - | - | - |`n"
+| Alias | IP | GW | DNS1 | DNS2 | Suffix | MAC |
+| - | - | - | - | - | - | - |`n"
 $($NicInfo | ForEach-Object{
     $DNSServers = Get-DnsClientServerAddress -InterfaceAlias "$($_.InterfaceAlias)"
     $Gateway = Get-NetIPConfiguration -InterfaceAlias  "$($_.InterfaceAlias)"
     $MacAddr = Get-NetAdapter -InterfaceIndex $($_.InterfaceIndex)
-    $SysOut += "| $($_.InterfaceAlias) | $($_.IPAddress) | $($Gateway.IPv4DefaultGateway.NextHop) | $($DNSServers[0].ServerAddresses[0]) |  $($DNSServers[0].ServerAddresses[1]) | $($MACAddr.MacAddress) |`n"
+    $SysOut += "| $($_.InterfaceAlias) | $($_.IPAddress) | $($Gateway.IPv4DefaultGateway.NextHop) | $($DNSServers[0].ServerAddresses[0]) | $($DNSServers[0].ServerAddresses[1]) | $($Gateway.NetProfile.Name) | $($MACAddr.MacAddress) |`n"
 })
 $SysOut += "
-## Shares Information
+---
+
+# Shares Information
 
 | Name | Path | Description |
 | - | - | - |`n"
 $($Shares | ForEach-Object {
     $SysOut += "| $($_.Name) | $($_.Path) | $($_.Description) |`n"
 })
+
+$SysOut += "`n## Share Permissions`n"
+
+$($Shares | ForEach-Object {
+
+    $SysOut += "`n#### Share $($_.Name)`n"
+    $SysOut += "`n| Account Name | Access | Rights |`n"
+    $SysOut += "| - | - | - |`n"
+    $SharePerm = Get-SmbShareAccess -Name "$($_.Name)"
+
+    $($SharePerm | ForEach-Object {
+        $SysOut += "| $($_.AccountName) | $($_.AccessControlType) | $($_.AccessRight) |`n"
+    });
+
+})
 $SysOut +="
+----
+
 # Software Information
 
 ## Installed Roles
