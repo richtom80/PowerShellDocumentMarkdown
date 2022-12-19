@@ -8,7 +8,7 @@ $roles = Get-WindowsFeature | Where-Object {$_.InstallState -eq 'Installed'}
 $DiskInfo = get-wmiobject -class win32_logicaldisk
 $Shares = Get-SMBShare
 
-$SysOut = "# $(hostname) Configuration
+$SysOut = "# $($hostname) Configuration
 
 #server
 

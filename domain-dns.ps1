@@ -28,4 +28,4 @@ $dkim2 = Resolve-DnsName -Name "selector2._domainkey.$domain" -Type CNAME
 $table += "| $($dkim2.QueryType) | $($dkim2.NameHost) | selector2._domainkey |`n"
 
 # Output results and escape underscores
-echo $table.replace('_','\_')
+Write-Output $table.replace('_','\_')
