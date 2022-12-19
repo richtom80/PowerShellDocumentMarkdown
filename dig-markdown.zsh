@@ -35,10 +35,41 @@ echo "|------|-------|------|"
 for data in "${table_data[@]}"; do
   # Split the data into columns
   columns=($(echo "$data" | awk '{print $1, $2, $3, $4, $5, $6, $7}'))
-  if [[ ${columns[4]} == "A" || ${columns[4]} == "TXT" || ${columns[4]} == "MX" ]]; then
+  #if [[ ${columns[4]} == "A" || ${columns[4]} == "TXT" || ${columns[4]} == "MX" ]]; then
     # Output the columns as a table row
     echo "| ${columns[4]} | ${columns[5]} ${columns[6]} ${columns[7]} | @ |"
+  #fi
+done
+
+## Autodiscover Records
+autodiscover=$(dig autodiscover.$1 CNAME)
+
+# Initialize variables to store the table data
+table_autodiscover=()
+
+# Flag to indicate whether we are currently in the ANSWER SECTION
+in_answer_section=false
+
+# Loop through each line of the output
+while read -r line; do
+  # If the line starts with ";; ANSWER SECTION:", set the flag to true
+  if [[ $line =~ ^";; ANSWER SECTION:" ]]; then
+    in_answer_section=true
+  # If the line starts with ";;", set the flag to false
+  elif [[ $line =~ ^";;" ]]; then
+    in_answer_section=false
+  # If we are in the ANSWER SECTION and the line is not empty, add it to the table data
+  elif [[ $in_answer_section == true && ! -z "$line" ]]; then
+    table_autodiscover+=("$line")
   fi
+done <<< "$autodiscover"
+
+# Loop through the table data and output each line as a table row
+for data in "${table_autodiscover[@]}"; do
+  # Split the data into columns
+  columns=($(echo "$data" | awk '{print $1, $2, $3, $4, $5, $6, $7}'))
+    # Output the columns as a table row
+  echo "| ${columns[4]} | ${columns[5]} ${columns[6]} ${columns[7]} | autodiscover |"
 done
 
 
