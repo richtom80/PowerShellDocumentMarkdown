@@ -10,7 +10,9 @@ $table = "## DNS Details for '$($domain)'
 | Type | Value | Sub Domain |`n| --- | --- | --- |`n"
 
 $($resolve_all | ForEach-Object{
- $table += "| $($_.QueryType)$($_.Preference) | $($_.NameHost)$($_.IPAddress)$($_.NameExchange)$($_.Strings)$($_.NameAdministrator) | @ |`n"
+    if($($_.Section) -ne 'Additional'){
+        $table += "| $($_.QueryType)$($_.Preference) | $($_.NameHost)$($_.IPAddress)$($_.NameExchange)$($_.Strings)$($_.NameAdministrator) | @ |`n"
+    }
 })
 
 $autodiscover = Resolve-DnsName -Name "autodiscover.$domain" -Type CNAME
