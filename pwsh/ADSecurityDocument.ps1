@@ -33,4 +33,4 @@ $($groupInfo | ForEach-Object {
 	$SysOut += "| $($_.Group) | $($_.Members) |`n"
 })
 
-Write-Output $SysOut
+Write-Output $SysOut.replace('_','\_').replace('$','\$')
