@@ -30,7 +30,7 @@ foreach ($subDir in $subDirs)
 
 $sysOut = "# Directory information
 
-Directory: $dir
+> Directory: $dir
 
 | Name | Size (GB) |
 | - | - |`n"
@@ -38,4 +38,4 @@ $folderSize | ForEach-Object {
     $sysOut += "| $($_.Name) | $($_.Size) |`n"
 }
 
-Write-Output $SysOut
+Write-Output $SysOut.replace('\','\\')
