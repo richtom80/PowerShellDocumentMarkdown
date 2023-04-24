@@ -23,7 +23,7 @@ $DomainLookupBtn.Size = New-Object System.Drawing.Size(50,20)
 $DomainLookupBtn.Location = New-Object System.Drawing.Point(410,15)
 
 $DomainLookupOut = New-Object System.Windows.Forms.TextBox
-$DomainLookupOut.Size = New-Object System.Drawing.Size(780, 480)
+$DomainLookupOut.Size = New-Object System.Drawing.Size(780, 470)
 $DomainLookupOut.Location = New-Object System.Drawing.Point(10, 50)
 $DomainLookupOut.Font = 'Courier,10'
 $DomainLookupOut.Multiline = $true;
