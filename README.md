@@ -18,3 +18,4 @@ I wanted to have a way to document server and computers and output as markdown t
 - DomainDns.ps1 - This script, when run from any system will use the DNS domain tools to query a domain name and all associated records.  In addition it will also document the _dmarc subdomain TXT record and standard DKIM records for O365 (selector1 & selector2). `.\DomainDns.ps1 example.com` to run
 - ServerDocument.ps1 - This script is designed to document a Windows Server recording details including memory, storage, networking, shares, roles and installed software.
 - FolderSize.ps1 - Takes a directory and outputs the first level folder size in markdown as Folder Name and Size in GB, similar to "du -l 1"
+- ExchangeOnlneUserUsage.ps1 - Documents the users mailbox usage in GBs and Item count
