@@ -61,6 +61,9 @@ function DomainLookup {
     $dkim2 = Resolve-DnsName -Name "selector2._domainkey.$domain" -Type CNAME
     $table += "| $($dkim2.QueryType) | $($dkim2.NameHost) | selector2._domainkey |`r`n"
 
+    $gsuite_dkim = Resolve-DnsName -Name "google._domainkey.$domain" -Type TXT
+    $table += "| $($gsuite_dkim.QueryType) | $($gsuite_dkim.Strings) | google._domainkey |`r`n"
+
     # Output results and escape underscores
     $DomainLookupOut.Text = $table.replace('_','\_')
 
