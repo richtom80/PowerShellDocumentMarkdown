@@ -78,3 +78,39 @@ Offline regression checks (mock data only, no tenant connection):
 ```powershell
 pwsh -NoProfile -File ./tests/SharePointReports.Tests.ps1
 ```
+
+### Teams OneDrive and application discovery
+
+The remaining discovery reports can be collected with PowerShell:
+
+- `pwsh/ExportTeamsInventory.ps1`: Teams, hosted channels, team members and direct private/shared channel members. `-IncludeFileLocations` also attempts to map each channel to its files folder.
+- `pwsh/ExportOneDriveInventory.ps1`: existing OneDrive sites, owners, storage, quota and lock state. Item counts are marked not collected, not zero.
+- `pwsh/ExportEntraApplicationDependencies.ps1`: enterprise applications, SSO mode, assignments, owner IDs, app registrations and credential expiry metadata. `-IncludeProvisioning` adds provisioning job metadata. No secret values, certificate contents or provisioning credentials are exported.
+- `pwsh/ExportRemainingTenantDiscovery.ps1`: runs those three reports with file-location and provisioning lookups enabled, continuing if a report fails.
+
+Install prerequisites once. Then run from the repository root:
+
+```powershell
+Install-Module Microsoft.Graph.Authentication -Scope CurrentUser
+Install-Module PnP.PowerShell -Scope CurrentUser
+
+$TenantId = Read-Host 'SVL source tenant ID'
+$AdminUrl = Read-Host 'SharePoint admin URL, e.g. https://tenant-admin.sharepoint.com'
+$ClientId = Read-Host 'Approved PnP application client ID'
+
+./pwsh/ExportRemainingTenantDiscovery.ps1 -TenantId $TenantId -AdminUrl $AdminUrl -ClientId $ClientId -OutputFolder ./SVL
+```
+
+Use PowerShell supported by the installed modules. The Graph scripts sign in with process-scoped delegated access. Teams requests `Group.Read.All`, `TeamMember.Read.All`, `Channel.ReadBasic.All`, `ChannelMember.Read.All` and, for file locations, `Files.Read.All`. Applications requests `Application.Read.All` and optionally `Synchronization.Read.All`. These permissions may need administrator consent; provisioning metadata also requires an appropriate Entra role. OneDrive requires SharePoint tenant-administrator access and an approved PnP application. The PnP client ID is not used by the Graph sign-in.
+
+All scripts read metadata only and write CSVs locally. Fixed output filenames are replaced on each run. Review `RemainingDiscoveryRuns.csv` and each report's `.coverage.csv` and `.errors.csv`; zero rows accompanied by an error are not evidence that nothing exists. Existing report files may remain if a report cannot start because a prerequisite is missing. Use a fresh output folder for a new collection when preserving earlier results matters.
+
+Teams visibility depends on the signed-in account and consent; compare results to the supplied team/site inventories. Incoming shared channels hosted by other teams/tenants and indirect shared-channel members are not enumerated. Standard-channel membership follows its team. Message/chat contents, recordings and Planner data are not exported. OneDrive only covers already provisioned sites returned by the admin service; it does not create drives or grant access, and does not measure item counts, links or file permissions. Applications need owner review for full SAML claims, external MFA/Duo configuration and domain-release dependencies. Planner/Forms/flows/Power Apps/Power BI still require their own workload assessment.
+
+References: [Graph channel members](https://learn.microsoft.com/en-us/graph/api/channel-list-members?view=graph-rest-1.0), [PnP tenant sites](https://pnp.github.io/powershell/cmdlets/Get-PnPTenantSite.html), [Graph service principals](https://learn.microsoft.com/en-us/graph/api/serviceprincipal-list?view=graph-rest-1.0), [Graph provisioning jobs](https://learn.microsoft.com/en-us/graph/api/synchronization-synchronization-list-jobs?view=graph-rest-1.0).
+
+Offline checks:
+
+```powershell
+pwsh -NoProfile -File ./tests/TenantDiscovery.Tests.ps1
+```
